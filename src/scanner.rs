@@ -64,7 +64,7 @@ pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Result<Option<i64>
     let ts: i64;
 
     // if .git is available, get last commit timestamp via git cli
-    if path_buf.join(".git").exists() {
+    if path_buf.join(".git").is_dir() {
         let output = Command::new("git")
             .arg("-C")
             .arg(path_buf.as_path())
@@ -115,11 +115,17 @@ fn get_dir_size_bytes(path: &PathBuf) -> u64 {
 }
 
 pub fn get_removable_space_bytes(path: &PathBuf) -> u64 {
-    DIRS_TO_CLEAR
-        .iter()
-        .filter(|d| path.join(d).exists())
-        .map(|d| get_dir_size_bytes(&path.join(d)))
-        .sum()
+    let mut total = 0u64;
+    for d in DIRS_TO_CLEAR {
+        let dir_path = path.join(d);
+        if let Ok(md) = dir_path.metadata()
+            && md.is_dir()
+        {
+            total += get_dir_size_bytes(&dir_path);
+        }
+    }
+
+    return total;
 }
 
 pub fn bytes_to_mb(bytes: u64) -> u64 {
