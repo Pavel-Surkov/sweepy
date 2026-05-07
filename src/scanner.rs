@@ -2,7 +2,7 @@ use anyhow::{Context, Result, anyhow};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
-use walkdir::DirEntry;
+use walkdir::{DirEntry, WalkDir};
 
 const PROJECT_ROOT_MARKERS: &[&str] = &[
     ".git",
@@ -15,10 +15,34 @@ const PROJECT_ROOT_MARKERS: &[&str] = &[
 ];
 
 // resolves an entry path is a git/cargo/npm project
-pub fn is_project_root(entry: &DirEntry) -> bool {
+fn is_project_root(entry: &DirEntry) -> bool {
     PROJECT_ROOT_MARKERS
         .iter()
         .any(|m| entry.path().join(m).exists())
+}
+
+pub fn find_project_roots(path: &PathBuf) -> Vec<std::path::PathBuf> {
+    let mut iterator: walkdir::IntoIter = WalkDir::new(path).into_iter();
+    let mut project_roots: Vec<std::path::PathBuf> = vec![];
+
+    while let Some(entry) = iterator.next() {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+
+        if !entry.file_type().is_dir() {
+            continue;
+        }
+
+        if is_project_root(&entry) {
+            project_roots.push(entry.path().to_path_buf());
+            iterator.skip_current_dir();
+            continue;
+        }
+    }
+
+    return project_roots;
 }
 
 fn system_time_to_unix_secs(t: SystemTime) -> Option<i64> {

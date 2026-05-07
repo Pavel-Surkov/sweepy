@@ -2,10 +2,9 @@ use std::os::unix::fs::MetadataExt;
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use walkdir::WalkDir;
 
 use sweepy::cli::{Cli, Commands};
-use sweepy::scanner::{get_last_modification_ts, is_project_root};
+use sweepy::scanner::{find_project_roots, get_last_modification_ts};
 use sweepy::validation::validate_workspace_path;
 
 fn main() -> Result<()> {
@@ -16,29 +15,7 @@ fn main() -> Result<()> {
             validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
-            let mut it = WalkDir::new(&path).into_iter();
-
-            let mut project_roots: Vec<std::path::PathBuf> = vec![];
-
-            while let Some(entry) = it.next() {
-                let entry = match entry {
-                    Ok(e) => e,
-                    Err(_) => continue,
-                };
-
-                if !entry.file_type().is_dir() {
-                    continue;
-                }
-
-                if is_project_root(&entry) {
-                    project_roots.push(entry.path().to_path_buf());
-                    it.skip_current_dir();
-                    continue;
-                }
-            }
-
-            println!("scan: {}\n", path.display());
-
+            let project_roots = find_project_roots(&path);
             for root_buf in project_roots {
                 let Some(project_name) = root_buf.file_name() else {
                     continue;
