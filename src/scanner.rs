@@ -14,6 +14,16 @@ const PROJECT_ROOT_MARKERS: &[&str] = &[
     "bun.lockb",
 ];
 
+const DIRS_TO_CLEAR: &[&str] = &[
+    "node_modules",
+    ".next",
+    "dist",
+    ".vite",
+    ".cache",
+    "coverage",
+    "target",
+];
+
 // resolves an entry path is a git/cargo/npm project
 fn is_project_root(entry: &DirEntry) -> bool {
     PROJECT_ROOT_MARKERS
@@ -50,7 +60,7 @@ fn system_time_to_unix_secs(t: SystemTime) -> Option<i64> {
     i64::try_from(secs).ok()
 }
 
-pub fn get_last_modification_ts(path_buf: &PathBuf) -> Result<Option<i64>> {
+pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Result<Option<i64>> {
     let ts: i64;
 
     // if .git is available, get last commit timestamp via git cli
@@ -93,4 +103,29 @@ pub fn get_last_modification_ts(path_buf: &PathBuf) -> Result<Option<i64>> {
     }
 
     Ok(Some(ts))
+}
+
+fn get_dir_size_bytes(path: &PathBuf) -> u64 {
+    WalkDir::new(path.as_path())
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_type().is_file())
+        .filter_map(|e| e.metadata().ok().map(|m| m.len()))
+        .sum()
+}
+
+pub fn get_removable_space_bytes(path: &PathBuf) -> u64 {
+    DIRS_TO_CLEAR
+        .iter()
+        .filter(|d| path.join(d).exists())
+        .map(|d| get_dir_size_bytes(&path.join(d)))
+        .sum()
+}
+
+pub fn bytes_to_mb(bytes: u64) -> u64 {
+    bytes / 1024 / 1024
+}
+
+pub fn bytes_to_gb(bytes: u64) -> f64 {
+    bytes as f64 / 1024.0 / 1024.0 / 1024.0
 }
