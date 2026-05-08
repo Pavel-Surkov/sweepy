@@ -20,14 +20,14 @@ fn main() -> Result<()> {
             let project_roots = find_project_roots(&path);
             let mut total_removable_space_bytes: u64 = 0;
 
-            println!("{}", "—".repeat(67));
+            println!("{}", "—".repeat(70));
             println!(
-                "| {:<32} | {:>10} | {:>15} |",
+                "| {:<35} | {:>10} | {:>15} |",
                 "Project".white(),
                 "Size".white(),
                 "Last modified".white()
             );
-            println!("{}", "—".repeat(67));
+            println!("{}", "—".repeat(70));
 
             for root_buf in project_roots {
                 let Some(project_name) = root_buf.file_name() else {
@@ -53,7 +53,7 @@ fn main() -> Result<()> {
                 };
 
                 println!(
-                    "| {:<32} | {:>6} MiB | {:>6} days ago |",
+                    "| {:<35} | {:>6} MiB | {:>6} days ago |",
                     project_name.to_string_lossy().white(),
                     units::bytes_to_mb(removable_space_bytes)
                         .to_string()
@@ -64,7 +64,7 @@ fn main() -> Result<()> {
 
             let total = format!("{:.2}", units::bytes_to_gb(total_removable_space_bytes)).red();
 
-            println!("{}", "—".repeat(67));
+            println!("{}", "—".repeat(70));
             println!("\n▶ Total removable space: ~ {} GiB\n", total);
         }
         Commands::Clean {
