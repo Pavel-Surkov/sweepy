@@ -35,11 +35,13 @@ fn main() -> Result<()> {
                     continue;
                 };
 
+                let days_since_last_modification = units::get_days_since(last_mtime);
+
                 println!(
-                    "dir_name: {}; removable_space: {} MiB, last_modified: {}",
+                    "dir_name: {}; removable_space: {} MiB, last_modified: {} days ago",
                     project_name.to_string_lossy(),
                     units::bytes_to_mb(removable_space_bytes),
-                    last_mtime
+                    days_since_last_modification
                 );
             }
 

@@ -1,8 +1,9 @@
 use anyhow::{Context, Result, anyhow};
 use std::path::PathBuf;
 use std::process::Command;
-use std::time::{SystemTime, UNIX_EPOCH};
 use walkdir::{DirEntry, WalkDir};
+
+use crate::units::system_time_to_unix_secs;
 
 const PROJECT_ROOT_MARKERS: &[&str] = &[
     ".git",
@@ -53,11 +54,6 @@ pub fn find_project_roots(path: &PathBuf) -> Vec<std::path::PathBuf> {
     }
 
     return project_roots;
-}
-
-fn system_time_to_unix_secs(t: SystemTime) -> Option<i64> {
-    let secs = t.duration_since(UNIX_EPOCH).ok()?.as_secs();
-    i64::try_from(secs).ok()
 }
 
 pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Result<Option<i64>> {
