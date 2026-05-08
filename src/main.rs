@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use clap::Parser;
+use colored::Colorize;
 
 use sweepy::cli::{Cli, Commands};
 use sweepy::scanner::{
@@ -19,6 +20,15 @@ fn main() -> Result<()> {
             let project_roots = find_project_roots(&path);
             let mut total_removable_space_bytes: u64 = 0;
 
+            println!("{}", "—".repeat(67));
+            println!(
+                "| {:<32} | {:>10} | {:>15} |",
+                "Project".white(),
+                "Size".white(),
+                "Last modified".white()
+            );
+            println!("{}", "—".repeat(67));
+
             for root_buf in project_roots {
                 let Some(project_name) = root_buf.file_name() else {
                     continue;
@@ -36,19 +46,26 @@ fn main() -> Result<()> {
                 };
 
                 let days_since_last_modification = units::get_days_since(last_mtime);
+                let days_since_last_modification = if days_since_last_modification > 180 {
+                    days_since_last_modification.to_string().red()
+                } else {
+                    days_since_last_modification.to_string().white()
+                };
 
                 println!(
-                    "dir_name: {}; removable_space: {} MiB, last_modified: {} days ago",
-                    project_name.to_string_lossy(),
-                    units::bytes_to_mb(removable_space_bytes),
+                    "| {:<32} | {:>6} MiB | {:>6} days ago |",
+                    project_name.to_string_lossy().white(),
+                    units::bytes_to_mb(removable_space_bytes)
+                        .to_string()
+                        .white(),
                     days_since_last_modification
                 );
             }
 
-            println!(
-                "\nTotal removable space: around {:.2} GiB",
-                units::bytes_to_gb(total_removable_space_bytes)
-            );
+            let total = format!("{:.2}", units::bytes_to_gb(total_removable_space_bytes)).red();
+
+            println!("{}", "—".repeat(67));
+            println!("\n▶ Total removable space: ~ {} GiB\n", total);
         }
         Commands::Clean {
             path,
