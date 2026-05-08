@@ -3,17 +3,17 @@ use clap::Parser;
 
 use sweepy::cli::{Cli, Commands};
 use sweepy::scanner::{
-    bytes_to_gb, bytes_to_mb, find_project_roots, get_last_modification_timestamp,
-    get_removable_space_bytes,
+    find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
-use sweepy::validation::validate_workspace_path;
+use sweepy::units;
+use sweepy::validation;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Scan { path } => {
-            validate_workspace_path(&path)
+            validation::validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
             let project_roots = find_project_roots(&path);
@@ -38,14 +38,14 @@ fn main() -> Result<()> {
                 println!(
                     "dir_name: {}; removable_space: {} MiB, last_modified: {}",
                     project_name.to_string_lossy(),
-                    bytes_to_mb(removable_space_bytes),
+                    units::bytes_to_mb(removable_space_bytes),
                     last_mtime
                 );
             }
 
             println!(
                 "\nTotal removable space: around {:.2} GiB",
-                bytes_to_gb(total_removable_space_bytes)
+                units::bytes_to_gb(total_removable_space_bytes)
             );
         }
         Commands::Clean {
