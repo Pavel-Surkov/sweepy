@@ -2,7 +2,11 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
-#[command(name = "sweepy", version, about = "Find and remove stale build artifacts across your projects")]
+#[command(
+    name = "sweepy",
+    version,
+    about = "Find and remove stale build artifacts across your projects"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,

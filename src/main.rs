@@ -1,6 +1,8 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
+use std::fs;
+use sweepy::cleaner::get_older_than_unix;
 
 use sweepy::cli::{Cli, Commands};
 use sweepy::scanner::{
@@ -72,6 +74,12 @@ fn main() -> Result<()> {
             older_than,
             apply,
         } => {
+            validation::validate_workspace_path(&path)
+                .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
+
+            let project_roots = find_project_roots(&path);
+            let older_than_unix_ts = get_older_than_unix(&older_than)?;
+
             println!(
                 "clean={}, older_than={}, apply={}",
                 path.display(),
