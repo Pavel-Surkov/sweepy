@@ -3,37 +3,18 @@ use std::path::PathBuf;
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::constants;
 use crate::units::system_time_to_unix_secs;
-
-const PROJECT_ROOT_MARKERS: &[&str] = &[
-    ".git",
-    "package.json",
-    "Cargo.toml",
-    "pnpm-lock.yaml",
-    "yarn.lock",
-    "package-lock.json",
-    "bun.lockb",
-];
-
-const DIRS_TO_CLEAR: &[&str] = &[
-    "node_modules",
-    ".next",
-    "dist",
-    ".vite",
-    ".cache",
-    "coverage",
-    "target",
-];
 
 // resolves an entry path is a git/cargo/npm project
 fn is_project_root(entry: &DirEntry) -> bool {
-    PROJECT_ROOT_MARKERS
+    constants::PROJECT_ROOT_MARKERS
         .iter()
         .any(|m| entry.path().join(m).exists())
 }
 
-pub fn find_project_roots(path: &PathBuf) -> Vec<std::path::PathBuf> {
-    let mut iterator: walkdir::IntoIter = WalkDir::new(path).into_iter();
+pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
+    let mut iterator: walkdir::IntoIter = WalkDir::new(path_buf).into_iter();
     let mut project_roots: Vec<std::path::PathBuf> = vec![];
 
     while let Some(entry) = iterator.next() {
@@ -56,35 +37,41 @@ pub fn find_project_roots(path: &PathBuf) -> Vec<std::path::PathBuf> {
     return project_roots;
 }
 
-pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Result<Option<i64>> {
-    let ts: i64;
+pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
+    let ts: Option<i64>;
 
     // if .git is available, get last commit timestamp via git cli
     if path_buf.join(".git").is_dir() {
-        let output = Command::new("git")
+        let Ok(output) = Command::new("git")
             .arg("-C")
             .arg(path_buf.as_path())
             .arg("log")
             .arg("-1")
             .arg("--format=%ct")
             .output()
-            .with_context(|| format!("failed to run git in {}", path_buf.display()))?;
+            .with_context(|| format!("failed to run git in {}", path_buf.display()))
+        else {
+            return None;
+        };
 
         if !output.status.success() {
-            return Ok(None); // not a git repo or no commits
+            return None; // not a git repo or no commits
         }
 
         let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
         if raw.is_empty() {
-            return Ok(None);
+            return None;
         }
 
         ts = raw
             .parse::<i64>()
-            .context("failed to parse git commit timestamp")?;
+            .context("failed to parse git commit timestamp")
+            .ok();
     } else {
         // else get metadata last modified timestamp
-        let metadata = path_buf.metadata()?;
+        let Ok(metadata) = path_buf.metadata() else {
+            return None;
+        };
 
         ts = metadata
             .modified()
@@ -95,10 +82,11 @@ pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Result<Option<i64>
                     "failed to get filesystem timestamp for {}",
                     path_buf.display()
                 )
-            })?;
+            })
+            .ok();
     }
 
-    Ok(Some(ts))
+    return ts;
 }
 
 fn get_dir_size_bytes(path: &PathBuf) -> u64 {
@@ -112,7 +100,7 @@ fn get_dir_size_bytes(path: &PathBuf) -> u64 {
 
 pub fn get_removable_space_bytes(path: &PathBuf) -> u64 {
     let mut total = 0u64;
-    for d in DIRS_TO_CLEAR {
+    for d in constants::DIRS_TO_CLEAR {
         let dir_path = path.join(d);
         if let Ok(md) = dir_path.metadata()
             && md.is_dir()

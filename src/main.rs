@@ -1,22 +1,22 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use std::fs;
-use sweepy::cleaner::get_older_than_unix;
+
+use sweepy::cleaner;
 
 use sweepy::cli::{Cli, Commands};
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
 use sweepy::units;
-use sweepy::validation;
+use sweepy::validation::validate_workspace_path;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Scan { path } => {
-            validation::validate_workspace_path(&path)
+            validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
             let project_roots = find_project_roots(&path);
@@ -39,15 +39,12 @@ fn main() -> Result<()> {
                 let removable_space_bytes = get_removable_space_bytes(&root_buf);
                 total_removable_space_bytes += removable_space_bytes;
 
-                let Ok(Some(last_mtime)) = get_last_modification_timestamp(&root_buf) else {
-                    eprintln!(
-                        "failed to get last modification timestamp for {}",
-                        project_name.to_string_lossy()
-                    );
+                let Some(last_mtime) = get_last_modification_timestamp(&root_buf) else {
                     continue;
                 };
 
                 let days_since_last_modification = units::get_days_since(last_mtime);
+                // TODO: Remove hardcoded 180d and add CLI option --older-than
                 let days_since_last_modification = if days_since_last_modification > 180 {
                     days_since_last_modification.to_string().red()
                 } else {
@@ -74,18 +71,25 @@ fn main() -> Result<()> {
             older_than,
             apply,
         } => {
-            validation::validate_workspace_path(&path)
+            validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
             let project_roots = find_project_roots(&path);
-            let older_than_unix_ts = get_older_than_unix(&older_than)?;
+            let older_than_unix_ts = cleaner::get_older_than_unix(&older_than)?;
 
-            println!(
-                "clean={}, older_than={}, apply={}",
-                path.display(),
-                older_than,
-                apply
-            );
+            let projects_to_clear = project_roots
+                .iter()
+                .filter_map(|pb| {
+                    let last_mtime = get_last_modification_timestamp(pb)?;
+                    if older_than_unix_ts - last_mtime > 0 {
+                        return Some(pb);
+                    }
+
+                    None
+                })
+                .collect();
+
+            cleaner::remove_all_removable_dirs(projects_to_clear, apply);
         }
     }
 
