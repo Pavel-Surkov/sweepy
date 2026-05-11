@@ -17,14 +17,15 @@ Supports Rust, Node.js, and any project with a `.git` root.
 ## Installation
 
 ```bash
+cargo install sweepy
+```
+
+Or build from source:
+
+```bash
 git clone https://github.com/Pavel-Surkov/sweepy
 cd sweepy
 cargo build --release
-```
-
-The binary will be at `./target/release/sweepy`. You can move it to a directory on your `$PATH`:
-
-```bash
 cp target/release/sweepy ~/.local/bin/
 ```
 
