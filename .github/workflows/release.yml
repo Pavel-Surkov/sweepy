@@ -53,8 +53,9 @@ jobs:
           body_path: RELEASE_NOTES.md
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Requires CARGO_REGISTRY_TOKEN secret in repository settings.
+      # Requires CARGO_REGISTRY_TOKEN secret in repository settings
       - name: Publish to crates.io
-        run: cargo publish
+        # --allow-dirty to skip issue with RELEASE_NOTES.md not commited
+        run: cargo publish --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
