@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **clean:** Implement clean command with dry-run support
 
+- **release:** Enable crates.io publish step
+
 
 
 ### Performance
