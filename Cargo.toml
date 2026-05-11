@@ -2,6 +2,9 @@
 name = "sweepy"
 version = "0.0.1"
 edition = "2024"
+description = "Find and remove stale build artifacts across your projects"
+license = "MIT"
+repository = "https://github.com/Pavel-Surkov/sweepy"
 
 [dependencies]
 anyhow = "1.0.102"
