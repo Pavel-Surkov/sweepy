@@ -7,15 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Features
-
-- **clean:** Implement clean command with dry-run support
-- **clean:** Scaffold clean command with older_than parsing
-- **scan:** Pretty-print scan output as colored table
-- **units:** Add days_since helper and consolidate time utils
-
 ### Bug Fixes
-
 - **scan:** Widen table columns to fit longer project names
 
-[unreleased]: https://github.com/Pavel-Surkov/sweepy/commits/main
+- **cliff:** Guard unreleased footer link against missing previous tag
+
+
+
+### Features
+- **cli:** Add initial scan and clean command skeleton
+
+- **core:** Add workspace path validation in scan flow
+
+- **scan:** Add project root discovery with walkdir
+
+- **scan:** Report removable space per project and total
+
+- **units:** Add days_since helper and consolidate time utils
+
+- **scan:** Pretty-print scan output as colored table
+
+- **clean:** Scaffold clean command with older_than parsing
+
+- **clean:** Implement clean command with dry-run support
+
+
+
+### Performance
+- **scanner:** Tighten git detection and removable dir checks
+
+
+
