@@ -31,7 +31,9 @@ footer = """
   https://github.com/Pavel-Surkov/sweepy/compare/{{ release.previous.version }}...{{ release.version }}
 {% endif -%}
 {% else -%}
+{% if release.previous.version -%}
 [unreleased]: https://github.com/Pavel-Surkov/sweepy/compare/{{ release.previous.version }}...HEAD
+{% endif -%}
 {% endif -%}
 {% endfor %}
 """
