@@ -3,19 +3,30 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::constants;
+use crate::constants::{self, ProjectInfo};
 use crate::units::system_time_to_unix_secs;
 
-// resolves an entry path is a git/cargo/npm project
-fn is_project_root(entry: &DirEntry) -> bool {
-    constants::PROJECT_ROOT_MARKERS
-        .iter()
-        .any(|m| entry.path().join(m.mark.as_str()).exists())
+fn get_project_template(entry: &DirEntry) -> Option<ProjectInfo> {
+    let template = constants::PROJECT_ROOT_MARKERS.iter().find(|m| {
+        if !entry.path().join(m.mark.as_str()).exists() {
+            return false;
+        }
+
+        true
+    });
+
+    match template {
+        Some(v) => Some(ProjectInfo {
+            path: entry.path().to_path_buf(),
+            template: v,
+        }),
+        None => None,
+    }
 }
 
-pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
+pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
     let mut iterator: walkdir::IntoIter = WalkDir::new(path_buf).into_iter();
-    let mut project_roots: Vec<PathBuf> = vec![];
+    let mut project_roots: Vec<ProjectInfo> = vec![];
 
     while let Some(entry) = iterator.next() {
         let entry = match entry {
@@ -27,27 +38,30 @@ pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
             continue;
         }
 
-        if is_project_root(&entry) {
-            project_roots.push(entry.path().to_path_buf());
-            iterator.skip_current_dir();
-            continue;
+        let project_template = get_project_template(&entry);
+        match project_template {
+            Some(v) => {
+                project_roots.push(v);
+                iterator.skip_current_dir();
+            }
+            None => continue,
         }
     }
 
     project_roots
 }
 
-pub fn get_last_modification_timestamp(path_buf: &Path) -> Option<i64> {
+pub fn get_last_modification_timestamp(path: &Path) -> Option<i64> {
     // if .git is available, get last commit timestamp via git cli
-    let ts: Option<i64> = if path_buf.join(".git").is_dir() {
+    let ts: Option<i64> = if path.join(".git").is_dir() {
         let Ok(output) = Command::new("git")
             .arg("-C")
-            .arg(path_buf)
+            .arg(path)
             .arg("log")
             .arg("-1")
             .arg("--format=%ct")
             .output()
-            .with_context(|| format!("failed to run git in {}", path_buf.display()))
+            .with_context(|| format!("failed to run git in {}", path.display()))
         else {
             return None;
         };
@@ -66,7 +80,7 @@ pub fn get_last_modification_timestamp(path_buf: &Path) -> Option<i64> {
             .ok()
     } else {
         // else get metadata last modified timestamp
-        let Ok(metadata) = path_buf.metadata() else {
+        let Ok(metadata) = path.metadata() else {
             return None;
         };
 
@@ -74,12 +88,7 @@ pub fn get_last_modification_timestamp(path_buf: &Path) -> Option<i64> {
             .modified()
             .ok()
             .and_then(system_time_to_unix_secs)
-            .ok_or_else(|| {
-                anyhow!(
-                    "failed to get filesystem timestamp for {}",
-                    path_buf.display()
-                )
-            })
+            .ok_or_else(|| anyhow!("failed to get filesystem timestamp for {}", path.display()))
             .ok()
     };
 
@@ -95,10 +104,10 @@ fn get_dir_size_bytes(path: &Path) -> u64 {
         .sum()
 }
 
-pub fn get_removable_space_bytes(path: &Path) -> u64 {
+pub fn get_removable_space_bytes(pi: &ProjectInfo) -> u64 {
     let mut total = 0u64;
-    for d in constants::DIRS_TO_CLEAR {
-        let dir_path = path.join(d);
+    for d in pi.template.dirs_to_clear {
+        let dir_path = pi.path.join(d);
         if let Ok(md) = dir_path.metadata()
             && md.is_dir()
         {

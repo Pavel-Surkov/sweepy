@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 pub enum SupportedLanguage {
     Rust,
     NodeJS,
@@ -35,6 +37,11 @@ pub struct ProjectTemplate {
     pub dirs_to_clear: &'static [&'static str],
 }
 
+pub struct ProjectInfo {
+    pub template: &'static ProjectTemplate,
+    pub path: PathBuf,
+}
+
 // TODO: Think of refactoring this part
 pub static PROJECT_ROOT_MARKERS: &[ProjectTemplate] = &[
     ProjectTemplate {
@@ -57,24 +64,13 @@ pub static PROJECT_ROOT_MARKERS: &[ProjectTemplate] = &[
             "out",
         ],
     },
-    // TODO: Think about, maybe no need in Unknown language since it's not clearing anything
-    // But anyway, .git IS a project marker
-    ProjectTemplate {
-        lang: SupportedLanguage::Unknown,
-        mark: Mark::Git,
-        dirs_to_clear: &[],
-    },
-];
-
-// TODO: remove
-pub const DIRS_TO_CLEAR: &[&str] = &[
-    "node_modules",
-    ".next",
-    "dist",
-    ".vite",
-    ".cache",
-    "coverage",
-    "target",
+    // Logically, ".git" IS a project marker, BUT no need to include it
+    // because none of directories will be removed, so it shouldn't be counted as a project
+    // ProjectTemplate {
+    //     lang: SupportedLanguage::Unknown,
+    //     mark: Mark::Git,
+    //     dirs_to_clear: &[],
+    // },
 ];
 
 pub const ALLOWED_TIME_UNITS: [char; 3] = ['d', 'm', 'y'];
