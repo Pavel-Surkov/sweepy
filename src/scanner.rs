@@ -34,7 +34,7 @@ pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
         }
     }
 
-    return project_roots;
+    project_roots
 }
 
 pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
@@ -86,7 +86,7 @@ pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
             .ok();
     }
 
-    return ts;
+    ts
 }
 
 fn get_dir_size_bytes(path: &PathBuf) -> u64 {
@@ -109,5 +109,5 @@ pub fn get_removable_space_bytes(path: &PathBuf) -> u64 {
         }
     }
 
-    return total;
+    total
 }

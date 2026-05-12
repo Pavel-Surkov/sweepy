@@ -70,7 +70,7 @@ fn remove_removable_dirs(path: &PathBuf, is_apply: bool) {
 
 pub fn remove_all_removable_dirs(paths: Vec<&PathBuf>, is_apply: bool) {
     if !is_apply {
-        println!("");
+        println!();
         println!("{}", "Directories to be removed:".red());
     }
 
@@ -84,7 +84,7 @@ pub fn remove_all_removable_dirs(paths: Vec<&PathBuf>, is_apply: bool) {
             println!("[dry-run] Cleaning project: {}", project_name.white());
         }
 
-        remove_removable_dirs(&pb, is_apply);
+        remove_removable_dirs(pb, is_apply);
     });
 
     if !is_apply {
