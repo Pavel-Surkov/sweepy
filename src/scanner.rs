@@ -1,5 +1,5 @@
 use anyhow::{Context, Result, anyhow};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
 
@@ -37,14 +37,12 @@ pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
     project_roots
 }
 
-pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
-    let ts: Option<i64>;
-
+pub fn get_last_modification_timestamp(path_buf: &Path) -> Option<i64> {
     // if .git is available, get last commit timestamp via git cli
-    if path_buf.join(".git").is_dir() {
+    let ts: Option<i64> = if path_buf.join(".git").is_dir() {
         let Ok(output) = Command::new("git")
             .arg("-C")
-            .arg(path_buf.as_path())
+            .arg(path_buf)
             .arg("log")
             .arg("-1")
             .arg("--format=%ct")
@@ -63,17 +61,16 @@ pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
             return None;
         }
 
-        ts = raw
-            .parse::<i64>()
+        raw.parse::<i64>()
             .context("failed to parse git commit timestamp")
-            .ok();
+            .ok()
     } else {
         // else get metadata last modified timestamp
         let Ok(metadata) = path_buf.metadata() else {
             return None;
         };
 
-        ts = metadata
+        metadata
             .modified()
             .ok()
             .and_then(system_time_to_unix_secs)
@@ -83,14 +80,14 @@ pub fn get_last_modification_timestamp(path_buf: &PathBuf) -> Option<i64> {
                     path_buf.display()
                 )
             })
-            .ok();
-    }
+            .ok()
+    };
 
     ts
 }
 
-fn get_dir_size_bytes(path: &PathBuf) -> u64 {
-    WalkDir::new(path.as_path())
+fn get_dir_size_bytes(path: &Path) -> u64 {
+    WalkDir::new(path)
         .into_iter()
         .filter_map(Result::ok)
         .filter(|e| e.file_type().is_file())
@@ -98,7 +95,7 @@ fn get_dir_size_bytes(path: &PathBuf) -> u64 {
         .sum()
 }
 
-pub fn get_removable_space_bytes(path: &PathBuf) -> u64 {
+pub fn get_removable_space_bytes(path: &Path) -> u64 {
     let mut total = 0u64;
     for d in constants::DIRS_TO_CLEAR {
         let dir_path = path.join(d);

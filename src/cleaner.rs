@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use anyhow::{Ok, Result, anyhow, bail};
@@ -51,7 +51,7 @@ pub fn get_older_than_unix(older_than: &String) -> Result<i64> {
     }
 }
 
-fn remove_removable_dirs(path: &PathBuf, is_apply: bool) {
+fn remove_removable_dirs(path: &Path, is_apply: bool) {
     constants::DIRS_TO_CLEAR
         .iter()
         .filter(|rd| path.join(rd).is_dir())
