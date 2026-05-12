@@ -16,10 +16,10 @@ Supports Rust and Node.js projects.
 
 ## Supported languages
 
-| Language | Detected by | Directories removed |
+| Language | Detected by | Directories to be removed |
 |----------|-------------|---------------------|
-| 🦀 Rust | `Cargo.toml` | `target` |
-| 🟩 Node.js | `package.json` | `node_modules`, `dist`, `build`, `.next`, `.nuxt`, `.cache`, `.vite`, `coverage`, `out` |
+| 🦀&nbsp;Rust | `Cargo.toml` | `target` |
+| 🟩&nbsp;Node.js | `package.json` | `node_modules`, `dist`, `build`, `.next`, `.nuxt`, `.cache`, `.vite`, `coverage`, `out` |
 
 Nested projects are not double-counted — traversal stops at the first project root found in each subtree.
 
