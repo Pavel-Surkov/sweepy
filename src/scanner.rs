@@ -10,12 +10,12 @@ use crate::units::system_time_to_unix_secs;
 fn is_project_root(entry: &DirEntry) -> bool {
     constants::PROJECT_ROOT_MARKERS
         .iter()
-        .any(|m| entry.path().join(m).exists())
+        .any(|m| entry.path().join(m.mark.as_str()).exists())
 }
 
 pub fn find_project_roots(path_buf: &PathBuf) -> Vec<std::path::PathBuf> {
     let mut iterator: walkdir::IntoIter = WalkDir::new(path_buf).into_iter();
-    let mut project_roots: Vec<std::path::PathBuf> = vec![];
+    let mut project_roots: Vec<PathBuf> = vec![];
 
     while let Some(entry) = iterator.next() {
         let entry = match entry {
