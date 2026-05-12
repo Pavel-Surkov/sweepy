@@ -2,10 +2,9 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
 
-use sweepy::cleaner;
+use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
 
 use sweepy::cli::{Cli, Commands};
-use sweepy::constants::ProjectInfo;
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
@@ -76,21 +75,9 @@ fn main() -> Result<()> {
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
             let project_roots = find_project_roots(&path);
-            let older_than_unix_ts = cleaner::get_older_than_unix(&older_than)?;
+            let projects_to_clear = get_projects_to_clear(&project_roots, &older_than);
 
-            let projects_to_clear: Vec<&ProjectInfo> = project_roots
-                .iter()
-                .filter_map(|pi| {
-                    let last_mtime = get_last_modification_timestamp(&pi.path)?;
-                    if older_than_unix_ts - last_mtime > 0 {
-                        return Some(pi);
-                    }
-
-                    None
-                })
-                .collect();
-
-            cleaner::remove_all_removable_dirs(projects_to_clear, apply);
+            remove_all_removable_dirs(projects_to_clear, apply);
         }
     }
 
