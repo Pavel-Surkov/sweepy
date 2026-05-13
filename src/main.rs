@@ -3,8 +3,8 @@ use clap::Parser;
 use colored::Colorize;
 
 use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
-
 use sweepy::cli::{Cli, Commands};
+use sweepy::config;
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
@@ -78,6 +78,11 @@ fn main() -> Result<()> {
             let projects_to_clear = get_projects_to_clear(&project_roots, &older_than);
 
             remove_all_removable_dirs(projects_to_clear, apply);
+        }
+        Commands::Config { add_language } => {
+            let config_pb = config::find_or_create_config().expect("Failed to find the config");
+
+            if add_language {}
         }
     }
 

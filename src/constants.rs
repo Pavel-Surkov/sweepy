@@ -13,7 +13,7 @@ impl SupportedLanguage {
             SupportedLanguage::Unknown => "unknown",
             SupportedLanguage::Rust => "Rust",
             SupportedLanguage::Php => "PHP",
-            SupportedLanguage::NodeJS => "NodeJS",
+            SupportedLanguage::NodeJS => "Node.js",
         }
     }
 }
@@ -81,5 +81,3 @@ pub static PROJECT_ROOT_MARKERS: &[ProjectTemplate] = &[
     //     dirs_to_clear: &[],
     // },
 ];
-
-pub const ALLOWED_TIME_UNITS: [char; 3] = ['d', 'm', 'y'];

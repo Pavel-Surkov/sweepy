@@ -5,9 +5,11 @@ use anyhow::{Ok, Result, anyhow, bail};
 use clap::builder::OsStr;
 use colored::Colorize;
 
-use crate::constants::{self, ProjectInfo};
+use crate::constants::ProjectInfo;
 use crate::scanner;
 use crate::units::system_time_to_unix_secs;
+
+pub const ALLOWED_TIME_UNITS: [char; 3] = ['d', 'm', 'y'];
 
 fn remove_removable_dirs(pi: &ProjectInfo, is_apply: bool) {
     pi.template
@@ -58,7 +60,7 @@ fn get_older_than_unix(older_than: &String) -> Result<i64> {
         .last()
         .ok_or_else(|| anyhow!("older_than value is empty"))?;
 
-    if !constants::ALLOWED_TIME_UNITS.contains(&unit) {
+    if !ALLOWED_TIME_UNITS.contains(&unit) {
         if unit.is_ascii_digit() {
             bail!(
                 "No time unit provided in '{}': expected d, m or y",
