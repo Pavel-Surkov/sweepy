@@ -3,6 +3,7 @@ use std::path::PathBuf;
 pub enum SupportedLanguage {
     Rust,
     NodeJS,
+    Php,
     Unknown,
 }
 
@@ -11,14 +12,16 @@ impl SupportedLanguage {
         match self {
             SupportedLanguage::Unknown => "unknown",
             SupportedLanguage::Rust => "Rust",
+            SupportedLanguage::Php => "PHP",
             SupportedLanguage::NodeJS => "NodeJS",
         }
     }
 }
 pub enum Mark {
-    Git,
     CargoToml,
     PackageJson,
+    Composer,
+    Git,
 }
 
 impl Mark {
@@ -26,6 +29,7 @@ impl Mark {
         match self {
             Mark::Git => ".git",
             Mark::CargoToml => "Cargo.toml",
+            Mark::Composer => "composer.json",
             Mark::PackageJson => "package.json",
         }
     }
@@ -63,6 +67,11 @@ pub static PROJECT_ROOT_MARKERS: &[ProjectTemplate] = &[
             "coverage",
             "out",
         ],
+    },
+    ProjectTemplate {
+        lang: SupportedLanguage::Php,
+        mark: Mark::Composer,
+        dirs_to_clear: &["vendor"],
     },
     // Logically, ".git" IS a project marker, BUT no need to include it
     // because none of directories will be removed, so it shouldn't be counted as a project
