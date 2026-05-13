@@ -43,7 +43,7 @@ pub fn remove_all_removable_dirs(pi_vec: Vec<&ProjectInfo>, is_apply: bool) {
             println!("[dry-run] Cleaning project: {}", project_name.white());
         }
 
-        remove_removable_dirs(&pi, is_apply);
+        remove_removable_dirs(pi, is_apply);
     });
 
     if !is_apply {

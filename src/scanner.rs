@@ -15,13 +15,10 @@ fn get_project_template(entry: &DirEntry) -> Option<ProjectInfo> {
         true
     });
 
-    match template {
-        Some(v) => Some(ProjectInfo {
+    template.map(|v| ProjectInfo {
             path: entry.path().to_path_buf(),
             template: v,
-        }),
-        None => None,
-    }
+        })
 }
 
 pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
