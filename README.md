@@ -1,17 +1,13 @@
 # sweepy
 
-> Find and free disk space by removing stale build artifacts across your projects.
-
-`sweepy` walks a directory of projects, identifies which ones haven't been touched in a while, and removes their generated build directories — safely. By default it always does a dry run; you have to explicitly pass `--apply` to delete anything.
+`sweepy` is a Rust CLI tool that identifies which of your projects haven't been touched in a while, and removes their generated builds and directories with dependencies. It does a dry run by default. You have to explicitly pass `--apply` to delete anything. 
 
 Supports Rust, Node.js, and PHP projects.
 
 ## Features
 
-- **Smart activity detection** — uses last git commit timestamp when available, falls back to filesystem mtime
+- uses last **git commit timestamp** when available, falls back to filesystem last mutation time
 - **Multi-ecosystem** — detects Rust (`target/`), Node.js (`node_modules/`, `dist/`, `.next/`, `.vite/`, `.cache/`, `coverage/`), and PHP (`vendor/`) projects
-- **Dry-run by default** — prints exactly what would be removed before touching anything
-- **Colored table output** — projects inactive for 180+ days are highlighted in red
 - **Flexible time syntax** — `90d`, `6m`, `2y`
 
 ## Supported languages
@@ -22,7 +18,7 @@ Supports Rust, Node.js, and PHP projects.
 | 🟩&nbsp;Node.js | `package.json` | `node_modules`, `dist`, `build`, `.next`, `.nuxt`, `.cache`, `.vite`, `coverage`, `out` |
 | 🐘&nbsp;PHP | `composer.json` | `vendor` |
 
-Nested projects are not double-counted — traversal stops at the first project root found in each subtree.
+Nested projects are not double-counted. Traversal stops at the first project root found in each subtree.
 
 ## Installation
 
