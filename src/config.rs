@@ -9,7 +9,7 @@ use crate::constants::PROJECT_ROOT_MARKERS;
 pub const CLI_DIR_NAME: &str = "sweepy";
 pub const CLI_CONFIG_NAME: &str = "config.toml";
 
-fn build_default_config() -> String {
+pub fn build_default_config() -> String {
     let mut s = String::from("# Sweepy configuration file.\n\n");
 
     for t in PROJECT_ROOT_MARKERS.iter() {
