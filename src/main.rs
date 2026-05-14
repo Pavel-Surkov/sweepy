@@ -4,7 +4,7 @@ use colored::Colorize;
 
 use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
 use sweepy::cli::{Cli, Commands};
-use sweepy::config;
+use sweepy::config::find_or_create_config;
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
@@ -82,8 +82,16 @@ fn main() -> Result<()> {
         Commands::Config {
             add_language,
             reset,
+            print_path,
         } => {
-            let config_pb = config::find_or_create_config().expect("Failed to find the config");
+            let config_pb = find_or_create_config().expect("Failed to find the config");
+
+            if print_path {
+                println!(
+                    "\nPATH TO THE CONFIGURATION FILE: {}\n",
+                    config_pb.display()
+                );
+            }
 
             if reset {}
 
