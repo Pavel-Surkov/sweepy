@@ -35,5 +35,8 @@ pub enum Commands {
         /// Add a new language interactively (name, marker file, directories to remove)
         #[arg(long)]
         add_language: bool,
+        /// Rewrite configuration file by default supported languages
+        #[arg(long)]
+        reset: bool,
     },
 }

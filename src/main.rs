@@ -79,8 +79,13 @@ fn main() -> Result<()> {
 
             remove_all_removable_dirs(projects_to_clear, apply);
         }
-        Commands::Config { add_language } => {
+        Commands::Config {
+            add_language,
+            reset,
+        } => {
             let config_pb = config::find_or_create_config().expect("Failed to find the config");
+
+            if reset {}
 
             if add_language {}
         }
