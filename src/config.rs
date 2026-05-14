@@ -4,22 +4,29 @@ use std::path::PathBuf;
 use anyhow::anyhow;
 use dirs::config_dir;
 
+use crate::constants::PROJECT_ROOT_MARKERS;
+
 pub const CLI_DIR_NAME: &str = "sweepy";
 pub const CLI_CONFIG_NAME: &str = "config.toml";
 
-const DEFAULT_CONFIG: &str = "\
-# Sweepy configuration file.
-# Built-in support for Rust, Node.js, and PHP is always active.
+fn build_default_config() -> String {
+    let mut s = String::from("# Sweepy configuration file.\n\n");
 
-# Disable built-in languages by name.
-# disabled_languages = [\"Node.js\"]
+    for t in PROJECT_ROOT_MARKERS {
+        s.push_str(&format!(
+            "[[language]]\nname = \"{}\"\nmark = \"{}\"\ndirs_to_clear = {}\n\n",
+            t.lang.as_str(),
+            t.mark.as_str(),
+            t.dirs_to_clear
+                .iter()
+                .map(|d| format!("\"{}\"", d))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ));
+    }
 
-# Add custom languages or override disabled ones.
-# [[languages]]
-# name = \"Python\"
-# mark = \"requirements.txt\"
-# dirs_to_clear = [\"__pycache__\", \".venv\", \"venv\", \"dist\", \"build\"]
-";
+    s
+}
 
 pub fn find_or_create_config() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let system_config_pb = config_dir()
@@ -32,7 +39,7 @@ pub fn find_or_create_config() -> Result<PathBuf, Box<dyn std::error::Error>> {
         if !config_dir_pb.exists() {
             fs::create_dir(config_dir_pb)?;
         }
-        fs::write(&full_config_pb, DEFAULT_CONFIG)?;
+        fs::write(&full_config_pb, build_default_config())?;
     }
 
     Ok(full_config_pb)
