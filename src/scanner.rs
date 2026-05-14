@@ -13,9 +13,10 @@ use crate::units::system_time_to_unix_secs;
 fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
     let config_path = find_or_create_config();
 
+    // Tries to create template from config file
+    // If error, create from default PROJECT_ROOT_MARKERS
     let template: Option<ProjectTemplate> = match config_path {
         Ok(pb) => {
-            // create template from config
             let content = fs::read_to_string(&pb).ok()?;
             let config = toml::from_str::<SweepyConfig>(&content).ok()?;
 
