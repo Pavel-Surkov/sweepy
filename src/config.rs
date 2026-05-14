@@ -12,11 +12,11 @@ pub const CLI_CONFIG_NAME: &str = "config.toml";
 fn build_default_config() -> String {
     let mut s = String::from("# Sweepy configuration file.\n\n");
 
-    for t in PROJECT_ROOT_MARKERS {
+    for t in PROJECT_ROOT_MARKERS.iter() {
         s.push_str(&format!(
-            "[[language]]\nname = \"{}\"\nmark = \"{}\"\ndirs_to_clear = {}\n\n",
-            t.lang.as_str(),
-            t.mark.as_str(),
+            "[[language]]\nname = \"{}\"\nmark = \"{}\"\ndirs_to_clear = [{}]\n\n",
+            t.name,
+            t.mark,
             t.dirs_to_clear
                 .iter()
                 .map(|d| format!("\"{}\"", d))

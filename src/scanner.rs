@@ -1,24 +1,43 @@
 use anyhow::{Context, Result, anyhow};
+
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use toml;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::constants::{self, ProjectInfo};
+use crate::config::find_or_create_config;
+use crate::constants::{self, ProjectInfo, ProjectTemplate, SweepyConfig};
 use crate::units::system_time_to_unix_secs;
 
-fn get_project_template(entry: &DirEntry) -> Option<ProjectInfo> {
-    let template = constants::PROJECT_ROOT_MARKERS.iter().find(|m| {
-        if !entry.path().join(m.mark.as_str()).exists() {
-            return false;
+fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
+    let config_path = find_or_create_config();
+
+    let template: Option<ProjectTemplate> = match config_path {
+        Ok(pb) => {
+            // create template from config
+            let content = fs::read_to_string(&pb).ok()?;
+            let config = toml::from_str::<SweepyConfig>(&content).ok()?;
+
+            config
+                .language
+                .into_iter()
+                .find(|m| entry.path().join(&m.mark).exists())
         }
+        Err(_) => constants::PROJECT_ROOT_MARKERS
+            .iter()
+            .find(|m| entry.path().join(&m.mark).exists())
+            .cloned(),
+    };
 
-        true
-    });
-
-    template.map(|v| ProjectInfo {
+    // Transform ProjectTemplate into ProjectInfo
+    match template {
+        Some(v) => Some(ProjectInfo {
             path: entry.path().to_path_buf(),
-            template: v,
-        })
+            template: v.clone(),
+        }),
+        None => None,
+    }
 }
 
 pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
@@ -35,7 +54,7 @@ pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
             continue;
         }
 
-        let project_template = get_project_template(&entry);
+        let project_template = try_project_info_for(&entry);
         match project_template {
             Some(v) => {
                 project_roots.push(v);
@@ -103,9 +122,9 @@ fn get_dir_size_bytes(path: &Path) -> u64 {
 
 pub fn get_removable_space_bytes(pi: &ProjectInfo) -> u64 {
     let mut total = 0u64;
-    for d in pi.template.dirs_to_clear {
+    for d in &pi.template.dirs_to_clear {
         let dir_path = pi.path.join(d);
-        if let Ok(md) = dir_path.metadata()
+        if let Ok(md) = dir_path.symlink_metadata()
             && md.is_dir()
         {
             total += get_dir_size_bytes(&dir_path);
