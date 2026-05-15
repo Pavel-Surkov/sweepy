@@ -15,7 +15,7 @@
 | ☕&nbsp;Gradle | `build.gradle` | `build`, `.gradle` |
 | 🐦&nbsp;Swift | `Package.swift` | `.build` |
 
-This table lists the built-in defaults. The supported set is stored in configuration file — run `sweepy config` to view, reset, or extend it.
+This table lists the built-in defaults. The supported set is stored in a TOML config file you can reset or extend — see [Configuration](#configuration).
 
 Nested projects are not double-counted. Traversal stops at the first project root found in each subtree.
 
@@ -88,3 +88,39 @@ The `--older-than` flag accepts values in days (`d`), months (`m`), or years (`y
 | `2y`   | 2 years       |
 
 Default is `180d`.
+
+## Configuration
+
+Supported languages are stored in a TOML config file, created automatically on first run. The `config` subcommand manages it:
+
+### Show the config file path (depends on your OS)
+
+```bash
+sweepy config --print-path
+```
+
+Open that file in any editor to inspect or edit the language entries directly.
+
+### Add a language
+
+```bash
+sweepy config --add-language
+```
+
+Prompts for:
+
+- **Language name** — display name, e.g. `Rust`
+- **Marker file** — the file that identifies a project root, e.g. `Cargo.toml`
+- **Directories to clear** — list of directories, separated by comma, e.g. `target, dist`
+
+The new entry is appended to the config file.
+
+### Reset to defaults
+
+```bash
+sweepy config --reset
+```
+
+Overwrites the config file with the built-in defaults from the table above.
+
+> Flags can be combined, e.g. `sweepy config --reset --add-language`.
