@@ -7,7 +7,7 @@ use colored::Colorize;
 
 use crate::constants::ProjectInfo;
 use crate::scanner;
-use crate::units::system_time_to_unix_secs;
+use crate::utils::system_time_to_unix_secs;
 
 pub const ALLOWED_TIME_UNITS: [char; 3] = ['d', 'm', 'y'];
 

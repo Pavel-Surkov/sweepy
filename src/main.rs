@@ -10,8 +10,7 @@ use sweepy::config::{build_default_config, find_or_create_config};
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
-use sweepy::units;
-use sweepy::validation::validate_workspace_path;
+use sweepy::utils::{self, validate_workspace_path};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -45,7 +44,7 @@ fn main() -> Result<()> {
                     continue;
                 };
 
-                let days_since_last_modification = units::get_days_since(last_mtime);
+                let days_since_last_modification = utils::get_days_since(last_mtime);
                 // TODO: Remove hardcoded 180d and add CLI option --older-than
                 let days_since_last_modification = if days_since_last_modification > 180 {
                     days_since_last_modification.to_string().red()
@@ -56,14 +55,14 @@ fn main() -> Result<()> {
                 println!(
                     "| {:<35} | {:>6} MiB | {:>6} days ago |",
                     project_name.to_string_lossy().white(),
-                    units::bytes_to_mb(removable_space_bytes)
+                    utils::bytes_to_mb(removable_space_bytes)
                         .to_string()
                         .white(),
                     days_since_last_modification
                 );
             }
 
-            let total = format!("{:.2}", units::bytes_to_gb(total_removable_space_bytes)).red();
+            let total = format!("{:.2}", utils::bytes_to_gb(total_removable_space_bytes)).red();
 
             println!("{}", "—".repeat(70));
             println!("\n▶ Total removable space: ~ {} GiB\n", total);

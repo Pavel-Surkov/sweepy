@@ -8,7 +8,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::config::find_or_create_config;
 use crate::constants::{self, ProjectInfo, ProjectTemplate, SweepyConfig};
-use crate::units::system_time_to_unix_secs;
+use crate::utils::system_time_to_unix_secs;
 
 fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
     let config_path = find_or_create_config();

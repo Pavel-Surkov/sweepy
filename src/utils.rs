@@ -1,5 +1,20 @@
 use std::time::SystemTime;
 
+use anyhow::{Result, bail};
+use std::path::Path;
+
+pub fn validate_workspace_path(path: &Path) -> Result<()> {
+    if !path.exists() {
+        bail!("Path does not exists: {}", path.display());
+    }
+
+    if !path.is_dir() {
+        bail!("Path is not a directory: {}", path.display());
+    }
+
+    Ok(())
+}
+
 pub fn bytes_to_mb(bytes: u64) -> u64 {
     bytes / (1024 * 1024)
 }
@@ -21,4 +36,11 @@ pub fn get_days_since(ts: i64) -> u64 {
     let now_ts = system_time_to_unix_secs(SystemTime::now()).unwrap_or(0);
     let elapsed = (now_ts - ts).max(0) as u64;
     get_days_from_secs(elapsed)
+}
+
+pub fn is_valid_dir_name(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
 }
