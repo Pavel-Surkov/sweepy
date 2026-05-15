@@ -92,7 +92,7 @@ fn main() -> Result<()> {
             }
 
             if reset && config_pb.exists() {
-                fs::write(&config_pb, build_default_config()).with_context(|| {
+                fs::write(&config_pb, build_default_config()?).with_context(|| {
                     format!("Failed to reset config at {}", config_pb.display())
                 })?;
                 println!("{}", "Config is successfully reset to defaults".green());
