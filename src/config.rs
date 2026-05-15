@@ -52,7 +52,7 @@ fn read_language_entries() -> Result<(String, String, String)> {
     Ok((name, mark, dirs_to_clear))
 }
 
-fn validate_and_format_dirs_input(input: &String) -> Vec<String> {
+fn validate_and_format_dirs_input(input: &str) -> Vec<String> {
     input
         .split(",")
         .filter_map(|s| {

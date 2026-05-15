@@ -32,13 +32,10 @@ fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
     };
 
     // Transform ProjectTemplate into ProjectInfo
-    match template {
-        Some(v) => Some(ProjectInfo {
-            path: entry.path().to_path_buf(),
-            template: v.clone(),
-        }),
-        None => None,
-    }
+    template.map(|v| ProjectInfo {
+        path: entry.path().to_path_buf(),
+        template: v.clone(),
+    })
 }
 
 pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
