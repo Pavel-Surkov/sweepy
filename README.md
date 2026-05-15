@@ -1,12 +1,6 @@
 # sweepy
 
-`sweepy` is a Rust CLI tool that identifies which of your projects haven't been touched in a while, and removes their generated builds and directories with dependencies. It does a dry run by default. You have to explicitly pass `--apply` to delete directories. 
-
-## Features
-
-- uses last **git commit timestamp** when available, falls back to filesystem last mutation time
-- **Multi-ecosystem** — detects Rust (`target/`), Node.js (`node_modules/`, `dist/`, `.next/`, `.vite/`, `.cache/`, `coverage/`), and PHP (`vendor/`) projects
-- **Flexible time syntax** — `90d`, `6m`, `2y`
+`sweepy` is a Rust CLI tool that identifies which of your projects haven't been touched in a while, and removes their generated builds and heavy dependency directories. Dry run by default, you have to explicitly pass `--apply` to delete directories. 
 
 ## Supported languages
 
@@ -15,6 +9,13 @@
 | 🦀&nbsp;Rust | `Cargo.toml` | `target` |
 | 🟩&nbsp;Node.js | `package.json` | `node_modules`, `dist`, `build`, `.next`, `.nuxt`, `.cache`, `.vite`, `coverage`, `out` |
 | 🐘&nbsp;PHP | `composer.json` | `vendor` |
+| 💧&nbsp;Elixir | `mix.exs` | `_build`, `deps` |
+| ⚡&nbsp;Zig | `build.zig` | `.zig-cache`, `zig-out` |
+| ☕&nbsp;Maven | `pom.xml` | `target` |
+| ☕&nbsp;Gradle | `build.gradle` | `build`, `.gradle` |
+| 🐦&nbsp;Swift | `Package.swift` | `.build` |
+
+This table lists the built-in defaults. The supported set is stored in configuration file — run `sweepy config` to view, reset, or extend it.
 
 Nested projects are not double-counted. Traversal stops at the first project root found in each subtree.
 
@@ -44,13 +45,13 @@ sweepy scan ~/projects
 ```
 
 ```
-——————————————————————————————————————————————————————————————————————
-| Project                             |       Size |   Last modified |
-——————————————————————————————————————————————————————————————————————
-| my-api                              |    342 MiB |     12 days ago |
-| old-side-project                    |    891 MiB |    203 days ago |
-| sweepy                              |     64 MiB |      0 days ago |
-——————————————————————————————————————————————————————————————————————
+———————————————————————————————————————————————————————————————————
+| Project                          |       Size |   Last modified |
+———————————————————————————————————————————————————————————————————
+| my-api                           |    342 MiB |     12 days ago |
+| old-side-project                 |    891 MiB |    203 days ago |
+| sweepy                           |     64 MiB |      0 days ago |
+———————————————————————————————————————————————————————————————————
 
 ▶ Total removable space: ~ 1.27 GiB
 ```

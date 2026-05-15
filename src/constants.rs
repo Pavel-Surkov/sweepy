@@ -47,6 +47,31 @@ pub static PROJECT_ROOT_MARKERS: LazyLock<Vec<ProjectTemplate>> = LazyLock::new(
             mark: "composer.json".to_string(),
             dirs_to_clear: vec!["vendor".to_string()],
         },
+        ProjectTemplate {
+            name: "Elixir".to_string(),
+            mark: "mix.exs".to_string(),
+            dirs_to_clear: vec!["_build".to_string(), "deps".to_string()],
+        },
+        ProjectTemplate {
+            name: "Zig".to_string(),
+            mark: "build.zig".to_string(),
+            dirs_to_clear: vec![".zig-cache".to_string(), "zig-out".to_string()],
+        },
+        ProjectTemplate {
+            name: "Maven".to_string(),
+            mark: "pom.xml".to_string(),
+            dirs_to_clear: vec!["target".to_string()],
+        },
+        ProjectTemplate {
+            name: "Gradle".to_string(),
+            mark: "build.gradle".to_string(),
+            dirs_to_clear: vec!["build".to_string(), ".gradle".to_string()],
+        },
+        ProjectTemplate {
+            name: "Swift".to_string(),
+            mark: "Package.swift".to_string(),
+            dirs_to_clear: vec![".build".to_string()],
+        },
         // Logically, ".git" IS a project marker, BUT no need to include it
         // because none of directories will be removed, so it shouldn't be counted as a project
     ]
