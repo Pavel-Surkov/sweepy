@@ -99,7 +99,9 @@ fn main() -> Result<()> {
                 println!("{}", "Config is successfully reset to defaults".green());
             }
 
-            if add_language {}
+            if add_language {
+                // TODO:
+            }
         }
     }
 
