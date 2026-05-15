@@ -2,41 +2,6 @@ use serde::Deserialize;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
-// pub enum SupportedLanguage {
-//     Rust,
-//     NodeJS,
-//     Php,
-//     Unknown,
-// }
-
-// impl SupportedLanguage {
-//     pub fn as_str(&self) -> &str {
-//         match self {
-//             SupportedLanguage::Unknown => "unknown",
-//             SupportedLanguage::Rust => "Rust",
-//             SupportedLanguage::Php => "PHP",
-//             SupportedLanguage::NodeJS => "Node.js",
-//         }
-//     }
-// }
-// pub enum Mark {
-//     CargoToml,
-//     PackageJson,
-//     Composer,
-//     Git,
-// }
-
-// impl Mark {
-//     pub fn as_str(&self) -> &str {
-//         match self {
-//             Mark::Git => ".git",
-//             Mark::CargoToml => "Cargo.toml",
-//             Mark::Composer => "composer.json",
-//             Mark::PackageJson => "package.json",
-//         }
-//     }
-// }
-
 #[derive(Deserialize, Debug)]
 pub struct SweepyConfig {
     pub language: Vec<ProjectTemplate>,
@@ -84,10 +49,5 @@ pub static PROJECT_ROOT_MARKERS: LazyLock<Vec<ProjectTemplate>> = LazyLock::new(
         },
         // Logically, ".git" IS a project marker, BUT no need to include it
         // because none of directories will be removed, so it shouldn't be counted as a project
-        // ProjectTemplate {
-        //     lang: SupportedLanguage::Unknown,
-        //     mark: Mark::Git,
-        //     dirs_to_clear: &[],
-        // },
     ]
 });
