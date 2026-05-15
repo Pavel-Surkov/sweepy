@@ -1,3 +1,4 @@
+use std::io::{self, Write};
 use std::time::SystemTime;
 
 use anyhow::{Result, bail};
@@ -13,6 +14,15 @@ pub fn validate_workspace_path(path: &Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn prompt(label: &str) -> Result<String> {
+    print!("{label}");
+    io::stdout().flush()?;
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input)?;
+    Ok(input.trim().to_string())
 }
 
 pub fn bytes_to_mb(bytes: u64) -> u64 {

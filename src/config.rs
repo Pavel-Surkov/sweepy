@@ -1,13 +1,14 @@
+use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
-use std::{fs, io};
 
 use anyhow::{Context, Result, anyhow};
+use colored::Colorize;
 use dirs::config_dir;
 
 use crate::constants::{PROJECT_ROOT_MARKERS, ProjectTemplate, SweepyConfig};
-use crate::utils::is_valid_dir_name;
+use crate::utils::{is_valid_dir_name, prompt};
 
 pub const CLI_DIR_NAME: &str = "sweepy";
 pub const CLI_CONFIG_NAME: &str = "config.toml";
@@ -44,20 +45,11 @@ pub fn find_or_create_config() -> Result<PathBuf> {
 }
 
 fn read_language_entries() -> Result<(String, String, String)> {
-    let mut name = String::new();
-    io::stdin().read_line(&mut name)?;
+    let name = prompt("Language name (e.g. Rust): ")?;
+    let mark = prompt("Marker file (e.g. Cargo.toml): ")?;
+    let dirs_to_clear = prompt("Dirs to clear (separate with comma e.g. target, dist, ...): ")?;
 
-    let mut mark = String::new();
-    io::stdin().read_line(&mut mark)?;
-
-    let mut dirs_to_clear = String::new();
-    io::stdin().read_line(&mut dirs_to_clear)?;
-
-    Ok((
-        name.trim().to_string(),
-        mark.trim().to_string(),
-        dirs_to_clear.trim().to_string(),
-    ))
+    Ok((name, mark, dirs_to_clear))
 }
 
 fn validate_and_format_dirs_input(input: &String) -> Vec<String> {
@@ -70,8 +62,12 @@ fn validate_and_format_dirs_input(input: &String) -> Vec<String> {
             }
 
             eprintln!(
-                "Invalid directory name: {}. Allowed symbols: a-z A-Z 0-9 . _ -",
-                trimmed
+                "{}",
+                format!(
+                    "Invalid directory name: '{}'. Allowed symbols: a-z A-Z 0-9 . _ -",
+                    trimmed
+                )
+                .red()
             );
             None
         })
@@ -94,6 +90,8 @@ pub fn add_new_language(config_pb: &PathBuf) -> Result<()> {
     config
 		.write_all(format!("\n{new_entry}").as_bytes())
 		.with_context(|| format!("Failed to add new language entries into configuration file.\nYou can add them manually at {}", config_pb.display()))?;
+
+    println!("{}", "New language added successfully".green());
 
     Ok(())
 }
