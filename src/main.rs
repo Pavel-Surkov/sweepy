@@ -6,7 +6,7 @@ use colored::Colorize;
 
 use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
 use sweepy::cli::{Cli, Commands};
-use sweepy::config::{build_default_config, find_or_create_config};
+use sweepy::config::{add_new_language, build_default_config, find_or_create_config};
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
@@ -99,7 +99,7 @@ fn main() -> Result<()> {
             }
 
             if add_language {
-                // TODO:
+                add_new_language(&config_pb)?;
             }
         }
     }
