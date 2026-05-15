@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-15
+
+### Features
+- **config:** Add config module with find_or_create_config and Config command scaffold
+
+- **config:** Add --reset flag scaffold to Config command
+
+- **config:** Add --print-path flag to Config command
+
+- **config:** Implement --reset to restore default config
+
+- **constants:** Add Elixir, Zig, Maven, Gradle, Swift as built-in defaults
+
+- **config:** Implement interactive --add-language
+
+- **config:** Add prompts and colored feedback to --add-language
+
+
+### Internal
+- Internal code improvements
+
 ## [0.2.1] - 2026-05-13
 
 ### Features
@@ -63,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Performance
 - **scanner:** Tighten git detection and removable dir checks
 
+[0.3.0]: https://github.com/Pavel-Surkov/sweepy/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Pavel-Surkov/sweepy/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Pavel-Surkov/sweepy/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Pavel-Surkov/sweepy/compare/v0.1.0...v0.1.1
