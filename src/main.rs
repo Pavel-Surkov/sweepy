@@ -1,15 +1,16 @@
+use std::fs;
+
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
 
 use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
-
 use sweepy::cli::{Cli, Commands};
+use sweepy::config::{add_new_language, build_default_config, find_or_create_config};
 use sweepy::scanner::{
     find_project_roots, get_last_modification_timestamp, get_removable_space_bytes,
 };
-use sweepy::units;
-use sweepy::validation::validate_workspace_path;
+use sweepy::utils::{self, validate_workspace_path};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -43,7 +44,7 @@ fn main() -> Result<()> {
                     continue;
                 };
 
-                let days_since_last_modification = units::get_days_since(last_mtime);
+                let days_since_last_modification = utils::get_days_since(last_mtime);
                 // TODO: Remove hardcoded 180d and add CLI option --older-than
                 let days_since_last_modification = if days_since_last_modification > 180 {
                     days_since_last_modification.to_string().red()
@@ -54,14 +55,14 @@ fn main() -> Result<()> {
                 println!(
                     "| {:<35} | {:>6} MiB | {:>6} days ago |",
                     project_name.to_string_lossy().white(),
-                    units::bytes_to_mb(removable_space_bytes)
+                    utils::bytes_to_mb(removable_space_bytes)
                         .to_string()
                         .white(),
                     days_since_last_modification
                 );
             }
 
-            let total = format!("{:.2}", units::bytes_to_gb(total_removable_space_bytes)).red();
+            let total = format!("{:.2}", utils::bytes_to_gb(total_removable_space_bytes)).red();
 
             println!("{}", "—".repeat(70));
             println!("\n▶ Total removable space: ~ {} GiB\n", total);
@@ -78,6 +79,28 @@ fn main() -> Result<()> {
             let projects_to_clear = get_projects_to_clear(&project_roots, &older_than);
 
             remove_all_removable_dirs(projects_to_clear, apply);
+        }
+        Commands::Config {
+            add_language,
+            reset,
+            print_path,
+        } => {
+            let config_pb = find_or_create_config().expect("Failed to find the config");
+
+            if print_path {
+                println!("\nPATH TO THE CONFIGURATION FILE: {}", config_pb.display());
+            }
+
+            if reset && config_pb.exists() {
+                fs::write(&config_pb, build_default_config()?).with_context(|| {
+                    format!("Failed to reset config at {}", config_pb.display())
+                })?;
+                println!("{}", "Config is successfully reset to defaults".green());
+            }
+
+            if add_language {
+                add_new_language(&config_pb)?;
+            }
         }
     }
 

@@ -30,4 +30,16 @@ pub enum Commands {
         #[arg(long)]
         apply: bool,
     },
+    /// View or extend the list of supported languages
+    Config {
+        /// Add a new language interactively (name, marker file, directories to remove)
+        #[arg(long)]
+        add_language: bool,
+        /// Reset configuration file to the default supported languages
+        #[arg(long)]
+        reset: bool,
+        /// Print the path to the configuration file
+        #[arg(long)]
+        print_path: bool,
+    },
 }
