@@ -1,8 +1,6 @@
 # sweepy
 
-`sweepy` is a Rust CLI tool that identifies which of your projects haven't been touched in a while, and removes their generated builds and directories with dependencies. It does a dry run by default. You have to explicitly pass `--apply` to delete anything. 
-
-Supports Rust, Node.js, and PHP projects.
+`sweepy` is a Rust CLI tool that identifies which of your projects haven't been touched in a while, and removes their generated builds and directories with dependencies. It does a dry run by default. You have to explicitly pass `--apply` to delete directories. 
 
 ## Features
 
