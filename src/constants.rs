@@ -19,7 +19,6 @@ pub struct ProjectInfo {
     pub path: PathBuf,
 }
 
-// TODO: Think of refactoring this part
 pub static PROJECT_ROOT_MARKERS: LazyLock<Vec<ProjectTemplate>> = LazyLock::new(|| {
     vec![
         ProjectTemplate {

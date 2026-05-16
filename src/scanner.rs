@@ -41,7 +41,7 @@ fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
 }
 
 // Returns unix timestamp for older_than relatively to SystemTime::now()
-pub fn get_older_than_unix(older_than: &String) -> Result<i64> {
+fn get_older_than_unix(older_than: &String) -> Result<i64> {
     let unit = older_than
         .chars()
         .last()
