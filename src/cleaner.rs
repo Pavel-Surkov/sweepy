@@ -18,8 +18,8 @@ fn remove_removable_dirs(pi: &ProjectInfo, is_apply: bool) {
                 if let Err(e) = fs::remove_dir_all(&pb) {
                     eprintln!("Warning: failed to remove {}: {e}", pb.display());
                 }
+                println!("removed directory: {}", pb.display());
             } else {
-                // Dry run
                 println!("[dry-run] would remove: {}", pb.display());
             }
         });
