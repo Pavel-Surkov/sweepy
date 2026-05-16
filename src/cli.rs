@@ -18,6 +18,9 @@ pub enum Commands {
     Scan {
         /// Root directory to search for projects
         path: PathBuf,
+        /// Only show projects with no changes older than this (e.g. 90d, 180d)
+        #[arg(long, default_value_t = String::from("0d"))]
+        older_than: String,
     },
     /// Remove build artifacts from projects that haven't been touched recently
     Clean {

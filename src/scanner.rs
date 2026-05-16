@@ -1,11 +1,13 @@
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result, anyhow, bail};
 
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::SystemTime;
 use toml;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::cleaner::ALLOWED_TIME_UNITS;
 use crate::config::find_or_create_config;
 use crate::constants::{self, ProjectInfo, ProjectTemplate, SweepyConfig};
 use crate::utils::system_time_to_unix_secs;
@@ -38,31 +40,76 @@ fn try_project_info_for(entry: &DirEntry) -> Option<ProjectInfo> {
     })
 }
 
-pub fn find_project_roots(path_buf: &PathBuf) -> Vec<ProjectInfo> {
+// Returns unix timestamp for older_than relatively to SystemTime::now()
+pub fn get_older_than_unix(older_than: &String) -> Result<i64> {
+    let unit = older_than
+        .chars()
+        .last()
+        .ok_or_else(|| anyhow!("older_than value is empty"))?;
+
+    if !ALLOWED_TIME_UNITS.contains(&unit) {
+        if unit.is_ascii_digit() {
+            bail!(
+                "No time unit provided in '{}': expected d, m or y",
+                older_than
+            );
+        } else {
+            bail!(
+                "Unexpected time unit '{}' in '{}': expected d, m or y",
+                unit,
+                older_than
+            );
+        }
+    } else {
+        let count = older_than[..older_than.len() - 1]
+            .parse::<i64>()
+            .map_err(|_| {
+                anyhow!(
+                    "Invalid number in '{}': expected format like 180d, 6m, 2y",
+                    older_than
+                )
+            })?;
+
+        let unix_secs = match unit {
+            'd' => count * 60 * 60 * 24,
+            'm' => count * 60 * 60 * 24 * 30,
+            'y' => count * 60 * 60 * 24 * 365,
+            _ => unreachable!(),
+        };
+
+        let now = system_time_to_unix_secs(SystemTime::now()).unwrap_or(0);
+        Ok(now - unix_secs)
+    }
+}
+
+pub fn find_project_roots(path_buf: &PathBuf, older_than: &String) -> Result<Vec<ProjectInfo>> {
+    let cutoff = get_older_than_unix(older_than)?;
     let mut iterator: walkdir::IntoIter = WalkDir::new(path_buf).into_iter();
     let mut project_roots: Vec<ProjectInfo> = vec![];
 
     while let Some(entry) = iterator.next() {
-        let entry = match entry {
-            Ok(e) => e,
-            Err(_) => continue,
-        };
-
+        let Ok(entry) = entry else { continue };
         if !entry.file_type().is_dir() {
             continue;
         }
 
-        let project_template = try_project_info_for(&entry);
-        match project_template {
-            Some(v) => {
-                project_roots.push(v);
-                iterator.skip_current_dir();
-            }
-            None => continue,
+        let Some(project_info) = try_project_info_for(&entry) else {
+            continue;
+        };
+
+        // Do not propagate into folders like node_modules, target etc.
+        iterator.skip_current_dir();
+
+        let Some(last_mtime) = get_last_modification_timestamp(entry.path()) else {
+            continue;
+        };
+
+        if last_mtime <= cutoff {
+            project_roots.push(project_info);
         }
     }
 
-    project_roots
+    Ok(project_roots)
 }
 
 pub fn get_last_modification_timestamp(path: &Path) -> Option<i64> {

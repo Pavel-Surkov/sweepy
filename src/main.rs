@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
 
-use sweepy::cleaner::{get_projects_to_clear, remove_all_removable_dirs};
+use sweepy::cleaner::remove_all_removable_dirs;
 use sweepy::cli::{Cli, Commands};
 use sweepy::config::{add_new_language, build_default_config, find_or_create_config};
 use sweepy::scanner::{
@@ -16,11 +16,11 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Scan { path } => {
+        Commands::Scan { path, older_than } => {
             validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
-            let project_roots = find_project_roots(&path);
+            let project_roots = find_project_roots(&path, &older_than)?;
             let mut total_removable_space_bytes: u64 = 0;
 
             println!("{}", "—".repeat(70));
@@ -45,12 +45,6 @@ fn main() -> Result<()> {
                 };
 
                 let days_since_last_modification = utils::get_days_since(last_mtime);
-                // TODO: Remove hardcoded 180d and add CLI option --older-than
-                let days_since_last_modification = if days_since_last_modification > 180 {
-                    days_since_last_modification.to_string().red()
-                } else {
-                    days_since_last_modification.to_string().white()
-                };
 
                 println!(
                     "| {:<35} | {:>6} MiB | {:>6} days ago |",
@@ -75,10 +69,8 @@ fn main() -> Result<()> {
             validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
-            let project_roots = find_project_roots(&path);
-            let projects_to_clear = get_projects_to_clear(&project_roots, &older_than);
-
-            remove_all_removable_dirs(projects_to_clear, apply);
+            let project_roots = find_project_roots(&path, &older_than)?;
+            remove_all_removable_dirs(&project_roots, apply);
         }
         Commands::Config {
             add_language,
