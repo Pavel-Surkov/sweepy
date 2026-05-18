@@ -3,7 +3,7 @@ use std::fs;
 use clap::builder::OsStr;
 use colored::Colorize;
 
-use crate::constants::ProjectInfo;
+use crate::{constants::ProjectInfo, scanner::get_removable_space_bytes, utils::bytes_to_gb};
 
 pub const ALLOWED_TIME_UNITS: [char; 3] = ['d', 'm', 'y'];
 
@@ -31,6 +31,8 @@ pub fn remove_all_removable_dirs(pi_vec: &[ProjectInfo], is_apply: bool) {
         println!("{}", "Directories to be removed:".red());
     }
 
+    let mut total_cleared = 0;
+
     pi_vec.iter().for_each(|pi| {
         let fallback = &OsStr::from("unknown");
         let project_name = pi.path.file_name().unwrap_or(fallback).to_string_lossy();
@@ -41,10 +43,17 @@ pub fn remove_all_removable_dirs(pi_vec: &[ProjectInfo], is_apply: bool) {
             println!("[dry-run] Cleaning project: {}", project_name.white());
         }
 
+        total_cleared += get_removable_space_bytes(&pi);
+
         remove_removable_dirs(pi, is_apply);
     });
 
     if !is_apply {
         println!("{}", "—".repeat(30).red());
+    } else {
+        println!(
+            "\n▶ Total space cleared: ~ {} GiB",
+            format!("{:.2}", bytes_to_gb(total_cleared)).red()
+        )
     }
 }
