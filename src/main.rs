@@ -37,7 +37,7 @@ fn main() -> Result<()> {
                     continue;
                 };
 
-                let removable_space_bytes = get_removable_space_bytes(&root_buf);
+                let removable_space_bytes = get_removable_space_bytes(&root_buf, false);
                 total_removable_space_bytes += removable_space_bytes;
 
                 let Some(last_mtime) = get_last_modification_timestamp(&root_buf.path) else {
@@ -65,12 +65,13 @@ fn main() -> Result<()> {
             path,
             older_than,
             apply,
+            hard,
         } => {
             validate_workspace_path(&path)
                 .with_context(|| format!("Invalid workspace path: {}", path.display()))?;
 
             let project_roots = find_project_roots(&path, &older_than)?;
-            remove_all_removable_dirs(&project_roots, apply);
+            remove_all_removable_dirs(&project_roots, apply, hard);
         }
         Commands::Config {
             add_language,

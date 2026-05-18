@@ -26,12 +26,15 @@ pub enum Commands {
     Clean {
         /// Root directory to search for projects
         path: PathBuf,
-        /// Only clean projects with no changes older than this (e.g. 90d, 180d)
+        /// Only remove projects with no changes older than this (e.g. 90d, 180d)
         #[arg(long, default_value_t = String::from("180d"))]
         older_than: String,
         /// Actually delete files; omit to do a dry run
         #[arg(long)]
         apply: bool,
+        /// Only use with --apply. Remove entire project directories.
+        #[arg(long)]
+        hard: bool,
     },
     /// View or extend the list of supported languages
     Config {

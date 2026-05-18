@@ -165,14 +165,24 @@ fn get_dir_size_bytes(path: &Path) -> u64 {
         .sum()
 }
 
-pub fn get_removable_space_bytes(pi: &ProjectInfo) -> u64 {
+pub fn get_removable_space_bytes(pi: &ProjectInfo, is_hard: bool) -> u64 {
     let mut total = 0u64;
-    for d in &pi.template.dirs_to_clear {
-        let dir_path = pi.path.join(d);
+
+    fn add_bytes(dir_path: &Path, total: &mut u64) {
         if let Ok(md) = dir_path.symlink_metadata()
             && md.is_dir()
         {
-            total += get_dir_size_bytes(&dir_path);
+            *total += get_dir_size_bytes(dir_path);
+        }
+    }
+
+    if is_hard {
+        let dir_path = &pi.path;
+        add_bytes(dir_path, &mut total);
+    } else {
+        for d in &pi.template.dirs_to_clear {
+            let dir_path = pi.path.join(d);
+            add_bytes(&dir_path, &mut total);
         }
     }
 
