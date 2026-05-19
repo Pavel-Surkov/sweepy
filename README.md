@@ -77,6 +77,19 @@ sweepy clean ~/projects --older-than 90d --apply
 > [!CAUTION]
 > `--apply` permanently deletes build directories. Only known generated directories are ever removed — source files are never touched.
 
+### Remove entire projects
+
+By default, only known generated directories are removed. To delete the **whole project directory** — source files included — pass `--hard`:
+
+```bash
+sweepy clean ~/projects --older-than 90d --hard --apply
+```
+
+Without `--apply`, `--hard` performs a dry run listing the project roots that would be deleted.
+
+> [!CAUTION]
+> `--hard --apply` permanently deletes entire project directories, **including source code**. Unlike the default mode, nothing is spared. Review the dry-run output carefully before applying.
+
 ### Time format
 
 The `--older-than` flag accepts values in days (`d`), months (`m`), or years (`y`):
